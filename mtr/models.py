@@ -26,9 +26,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+# Built-in Imports
+from typing import Literal, List
+import math
+import pathlib
+import os
+
+# Third-party Imports
 import torch
 import torch.nn as nn
-import math
+
+# Constants
+CWD = pathlib.Path(os.path.abspath(__file__)).parent
+WEIGHTS_DIR = CWD.parent/'weights'
 
 def conv3x3(in_planes, out_planes, stride=1, bias=False, dilation=1, groups=1):
     "3x3 convolution"
@@ -212,14 +222,29 @@ class Net(nn.Module):
         layers = [CRPBlock(in_planes, out_planes,stages, groups=groups)]
         return nn.Sequential(*layers)
     
-def net(num_classes, num_tasks):
-    """Constructs the network.
+def TrainedNet(
+        dataset:Literal["nyu", "kitt"], 
+        tasks:List=["seg", "depth", "normals"],
+        device=torch.device('cpu')
+    ):
 
-    Args:
-        num_classes (int): the number of classes for the segmentation head to output.
-        num_tasks (int): the number of tasks, either 2 - segm + depth, or 3 - segm + depth + normals
+    # Based on the dataset, select the number of classes
+    if dataset == "nyu":
+        num_classes = 40
+        model_ckpt = WEIGHTS_DIR/'ExpNYUD_three.ckpt'
+        num_tasks = 3
+    elif dataset == "kitti":
+        num_classes = 6
+        model_ckpt = WEIGHTS_DIR/'ExpKITTI_joint.ckpt'
+        num_tasks = 2
+    else:
+        raise Exception(f"{dataset} not a valid option: ['nyu', 'kitti']")
 
-    """
+    # Construct the model
     model = Net(num_classes, num_tasks)
-    return model
 
+    # Load the weights
+    model.load_state_dict(torch.load(str(model_ckpt), map_location=device)['state_dict']) 
+    model.to(device)
+
+    return model
