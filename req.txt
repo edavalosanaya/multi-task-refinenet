@@ -1,6 +1,0 @@
-torch>=0.4.0
-numpy
-opencv-python
-jupyter
-matplotlib
-Pillow

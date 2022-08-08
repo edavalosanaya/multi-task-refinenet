@@ -19,7 +19,7 @@ import mtr
 # Constants
 CWD = pathlib.Path(os.path.abspath(__file__)).parent
 EXAMPLES_DIR = CWD.parent/'examples'
-DEVICE = torch.device('cuda')
+DEVICE = torch.device('cpu')
     
 # Load example data
 NYU_MIN_DEPTH = 0
@@ -51,6 +51,7 @@ def test_nyu_forward_propagation(nyu_net):
     gt_norm = np.array(Image.open(norm_p))
 
     # Prepare the image
+    img = mtr.match_size_img(img)
     prep_img = mtr.prepare_img(img)
 
     # Move the image to the device
@@ -68,7 +69,7 @@ def test_nyu_forward_propagation(nyu_net):
     c_norm = mtr.clean_norm(norm, img) 
 
     # Load the cmap for 'nyu'
-    cmap = np.load(CWD.parent/'mtr'/'cmap_nyud.npy')
+    cmap = mtr.get_cmap('nyu')
     depth_coeff = 5000
 
     # Create figure

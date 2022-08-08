@@ -40,4 +40,4 @@ logging.config.dictConfig(LOGGING_CONFIG)
 
 # Internal Imports
 from .models import Net, TrainedNet
-from .utils import prepare_img, clean_seg, clean_depth, clean_norm
+from .utils import prepare_img, clean_seg, clean_depth, clean_norm, get_cmap, match_size_img
